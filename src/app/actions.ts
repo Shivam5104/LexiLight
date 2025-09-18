@@ -11,6 +11,7 @@ import {
   answerDocumentQuestions,
   AnswerDocumentQuestionsInput,
 } from '@/ai/flows/answer-document-questions';
+import { translateText, TranslateTextInput } from '@/ai/flows/translate-text';
 import mammoth from 'mammoth';
 
 export interface DocumentAnalysisState {
@@ -81,5 +82,15 @@ export async function answerQuestion(input: AnswerDocumentQuestionsInput) {
   } catch (error) {
     console.error(error);
     return { error: 'Failed to answer question.' };
+  }
+}
+
+export async function translate(input: TranslateTextInput) {
+  try {
+    const { translation } = await translateText(input);
+    return { translation };
+  } catch (error) {
+    console.error(error);
+    return { error: 'Failed to translate text.' };
   }
 }
