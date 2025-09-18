@@ -1,6 +1,6 @@
 'use client';
 
-import { useFormState } from 'react-dom';
+import { useActionState } from 'react';
 import { analyzeDocument } from '@/app/actions';
 import { Header } from '@/components/layout/header';
 import { DocumentUpload } from '@/components/document-upload';
@@ -13,7 +13,7 @@ const initialState = {
 };
 
 export default function Home() {
-  const [state, formAction] = useFormState(analyzeDocument, initialState);
+  const [state, formAction] = useActionState(analyzeDocument, initialState);
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
