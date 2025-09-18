@@ -1,5 +1,6 @@
 import { Scale } from 'lucide-react';
 import Link from 'next/link';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 export function Header() {
   return (
@@ -9,6 +10,8 @@ export function Header() {
           <Scale className="h-6 w-6 text-primary" />
           <span>Legalese Decoder</span>
         </Link>
+
+        <ThemeToggle />
       </div>
     </header>
   );
