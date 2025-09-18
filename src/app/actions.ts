@@ -12,7 +12,6 @@ import {
   AnswerDocumentQuestionsInput,
 } from '@/ai/flows/answer-document-questions';
 import mammoth from 'mammoth';
-import pdf from 'pdf-parse';
 
 export interface DocumentAnalysisState {
   summary?: string;
@@ -40,6 +39,7 @@ export async function analyzeDocument(
     let documentText = '';
 
     if (file.type === 'application/pdf') {
+      const pdf = (await import('pdf-parse')).default;
       const data = await pdf(buffer);
       documentText = data.text;
     } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
