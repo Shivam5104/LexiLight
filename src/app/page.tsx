@@ -1,12 +1,12 @@
 'use client';
 
-import { useActionState } from 'react';
-import { analyzeDocument } from '@/app/actions';
+import { useActionState, useState, useTransition } from 'react';
+import { analyzeDocument, DocumentAnalysisState } from '@/app/actions';
 import { Header } from '@/components/layout/header';
 import { DocumentUpload } from '@/components/document-upload';
 import { DocumentAnalysis } from '@/components/document-analysis';
 
-const initialState = {
+const initialState: DocumentAnalysisState = {
   summary: undefined,
   documentText: undefined,
   error: undefined,
@@ -14,6 +14,16 @@ const initialState = {
 
 export default function Home() {
   const [state, formAction] = useActionState(analyzeDocument, initialState);
+  const [isResetting, startTransition] = useTransition();
+
+  const handleReset = () => {
+    startTransition(() => {
+      // A trick to reset the form action state is to call it with a special FormData
+      const formData = new FormData();
+      formData.append('reset', 'true');
+      formAction(formData);
+    });
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -37,6 +47,8 @@ export default function Home() {
             <DocumentAnalysis
               summary={state.summary!}
               documentText={state.documentText!}
+              onReset={handleReset}
+              isResetting={isResetting}
             />
           )}
         </div>

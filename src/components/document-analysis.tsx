@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { answerQuestion, explainJargon, translate } from '@/app/actions';
-import { Loader2, Send, Sparkles, Languages } from 'lucide-react';
+import { Loader2, Send, Sparkles, Languages, RotateCcw } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
@@ -14,11 +14,13 @@ import { Separator } from '@/components/ui/separator';
 interface DocumentAnalysisProps {
   summary: string;
   documentText: string;
+  onReset: () => void;
+  isResetting: boolean;
 }
 
 type Language = 'English' | 'Hindi';
 
-export function DocumentAnalysis({ summary: initialSummary, documentText }: DocumentAnalysisProps) {
+export function DocumentAnalysis({ summary: initialSummary, documentText, onReset, isResetting }: DocumentAnalysisProps) {
   const [question, setQuestion] = useState('');
   const [currentQuestion, setCurrentQuestion] = useState('');
   const [isAnswering, setIsAnswering] = useState(false);
@@ -122,17 +124,23 @@ export function DocumentAnalysis({ summary: initialSummary, documentText }: Docu
 
   return (
     <Card className="overflow-hidden shadow-lg">
-      <div className="p-6 pb-0 flex justify-between items-center">
-        <h3 className="text-2xl font-semibold text-foreground">Document Analysis</h3>
-        <div className="flex items-center gap-2">
-            <Button variant={language === 'English' ? 'secondary': 'ghost'} size="sm" onClick={() => handleLanguageToggle('English')} disabled={isTranslating}>English</Button>
-            <Button variant={language === 'Hindi' ? 'secondary': 'ghost'} size="sm" onClick={() => handleLanguageToggle('Hindi')} disabled={isTranslating}>हिन्दी</Button>
+      <div className="p-6 pb-0 flex justify-between items-start">
+        <div>
+          <h3 className="text-2xl font-semibold text-foreground">Document Analysis</h3>
+          <div className="flex items-center gap-2 mt-2">
+              <Button variant={language === 'English' ? 'secondary': 'ghost'} size="sm" onClick={() => handleLanguageToggle('English')} disabled={isTranslating}>English</Button>
+              <Button variant={language === 'Hindi' ? 'secondary': 'ghost'} size="sm" onClick={() => handleLanguageToggle('Hindi')} disabled={isTranslating}>हिन्दी</Button>
+          </div>
         </div>
+        <Button variant="outline" onClick={onReset} disabled={isResetting}>
+          {isResetting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RotateCcw className="mr-2 h-4 w-4" />}
+          Analyze Another
+        </Button>
       </div>
-        <Tabs defaultValue="summary" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 rounded-none m-0 mt-4">
+        <Tabs defaultValue="summary" className="w-full mt-4">
+          <TabsList className="grid w-full grid-cols-2 rounded-none m-0">
             <TabsTrigger value="summary">Key Points</TabsTrigger>
-            <TabsTrigger value="qa">Q&amp;A</TabsTrigger>
+            <TabsTrigger value="qa">Q&A</TabsTrigger>
           </TabsList>
           
           <TabsContent value="summary" className="p-6 bg-card m-0">

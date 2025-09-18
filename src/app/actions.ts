@@ -20,10 +20,22 @@ export interface DocumentAnalysisState {
   error?: string;
 }
 
+const initialState: DocumentAnalysisState = {
+  summary: undefined,
+  documentText: undefined,
+  error: undefined,
+};
+
+
 export async function analyzeDocument(
   prevState: DocumentAnalysisState,
   formData: FormData
 ): Promise<DocumentAnalysisState> {
+  // Handle reset
+  if (formData.get('reset')) {
+    return initialState;
+  }
+
   const file = formData.get('document') as File;
 
   if (!file || file.size === 0) {
