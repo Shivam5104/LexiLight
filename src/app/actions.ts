@@ -12,6 +12,7 @@ import {
   AnswerDocumentQuestionsInput,
 } from '@/ai/flows/answer-document-questions';
 import { translateText, TranslateTextInput } from '@/ai/flows/translate-text';
+import { generateAudioSummary, GenerateAudioSummaryInput } from '@/ai/flows/generate-audio-summary';
 import mammoth from 'mammoth';
 
 export interface DocumentAnalysisState {
@@ -104,5 +105,15 @@ export async function translate(input: TranslateTextInput) {
   } catch (error) {
     console.error(error);
     return { error: 'Failed to translate text.' };
+  }
+}
+
+export async function generateAudio(input: GenerateAudioSummaryInput) {
+  try {
+    const { audioDataUri } = await generateAudioSummary(input);
+    return { audioDataUri };
+  } catch (error) {
+    console.error(error);
+    return { error: 'Failed to generate audio.' };
   }
 }

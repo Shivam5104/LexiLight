@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { answerQuestion, explainJargon, translate } from '@/app/actions';
-import { Loader2, Send, Sparkles, Languages, RotateCcw } from 'lucide-react';
+import { answerQuestion, explainJargon, translate, generateAudio } from '@/app/actions';
+import { Loader2, Send, Sparkles, Languages, RotateCcw, Volume2, Pause } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
@@ -36,6 +36,11 @@ export function DocumentAnalysis({ summary: initialSummary, documentText, onRese
   const [summary, setSummary] = useState({ English: initialSummary, Hindi: '' });
   const [answer, setAnswer] = useState({ English: '', Hindi: '' });
   
+  const [audioUrl, setAudioUrl] = useState('');
+  const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
+  
   const qaScrollAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -47,6 +52,19 @@ export function DocumentAnalysis({ summary: initialSummary, documentText, onRese
         }
     }
   }, [answer, isAnswering]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    const handleEnded = () => setIsAudioPlaying(false);
+    
+    if (audio) {
+      audio.addEventListener('ended', handleEnded);
+      return () => {
+        audio.removeEventListener('ended', handleEnded);
+      }
+    }
+  }, [audioUrl]);
+
 
   const handleQuestionSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,6 +138,28 @@ export function DocumentAnalysis({ summary: initialSummary, documentText, onRese
 
     setIsTranslating(false);
   }
+
+  const handleGenerateAudio = async () => {
+    setIsGeneratingAudio(true);
+    const textToSpeak = (language === 'Hindi' && summary.Hindi) ? summary.Hindi : summary.English;
+    const result = await generateAudio({ summaryText: textToSpeak });
+    if (result.audioDataUri) {
+      setAudioUrl(result.audioDataUri);
+    }
+    setIsGeneratingAudio(false);
+  }
+
+  const toggleAudioPlayback = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (isAudioPlaying) {
+      audio.pause();
+    } else {
+      audio.play();
+    }
+    setIsAudioPlaying(!isAudioPlaying);
+  };
+
 
   const displayedSummary = isTranslating ? 'Translating...' : (language === 'Hindi' && summary.Hindi) ? summary.Hindi : summary.English;
   const displayedAnswer = isTranslating && language ==='Hindi' ? 'Translating...' : (language === 'Hindi' && answer.Hindi) ? answer.Hindi : answer.English;
@@ -210,7 +250,22 @@ export function DocumentAnalysis({ summary: initialSummary, documentText, onRese
                   </PopoverContent>
                 )}
              </Popover>
-              <p className="text-xs text-muted-foreground mt-2" id="jargon-explainer-hint">Select any word or phrase in the summary to get an explanation.</p>
+              <div className="mt-4 flex items-center justify-between">
+                <p className="text-xs text-muted-foreground" id="jargon-explainer-hint">Select any word or phrase in the summary to get an explanation.</p>
+                {audioUrl ? (
+                  <div className="flex items-center gap-2">
+                    <Button onClick={toggleAudioPlayback} variant="outline" size="icon" aria-label={isAudioPlaying ? "Pause summary" : "Play summary"}>
+                       {isAudioPlaying ? <Pause className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+                    </Button>
+                    <audio ref={audioRef} src={audioUrl}></audio>
+                  </div>
+                ) : (
+                  <Button onClick={handleGenerateAudio} disabled={isGeneratingAudio}>
+                    {isGeneratingAudio ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Volume2 className="mr-2 h-4 w-4" />}
+                    Listen to Summary
+                  </Button>
+                )}
+              </div>
           </TabsContent>
           
           <TabsContent value="qa" className="p-6 bg-card m-0">
