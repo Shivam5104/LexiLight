@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { ThemeProvider } from '@/components/theme-provider';
 
 export const metadata: Metadata = {
-  title: 'Legalese Decoder',
+  title: 'Lexilight',
   description: 'An AI-powered legal document demystifier app designed for clarity and understanding.',
 };
 

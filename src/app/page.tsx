@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useState, useTransition } from 'react';
+import { useActionState, useTransition } from 'react';
 import { analyzeDocument, DocumentAnalysisState } from '@/app/actions';
 import { Header } from '@/components/layout/header';
 import { DocumentUpload } from '@/components/document-upload';
@@ -39,22 +39,22 @@ export default function Home() {
         </section>
 
         <div className="mt-10 max-w-4xl mx-auto">
-          {(!state.summary && !state.documentText) ? (
-            <form action={formAction}>
-              <DocumentUpload error={state.error} />
-            </form>
-          ) : (
-            <DocumentAnalysis
-              summary={state.summary!}
-              documentText={state.documentText!}
-              onReset={handleReset}
-              isResetting={isResetting}
-            />
-          )}
+          <form action={formAction}>
+            {(!state.summary && !state.documentText) ? (
+                <DocumentUpload error={state.error} />
+            ) : (
+              <DocumentAnalysis
+                summary={state.summary!}
+                documentText={state.documentText!}
+                onReset={handleReset}
+                isResetting={isResetting}
+              />
+            )}
+          </form>
         </div>
       </main>
       <footer className="py-6 text-center text-sm text-muted-foreground">
-        © {new Date().getFullYear()} Legalese Decoder. All rights reserved.
+        © {new Date().getFullYear()} Lexilight. All rights reserved.
       </footer>
     </div>
   );
