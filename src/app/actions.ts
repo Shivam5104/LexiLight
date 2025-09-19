@@ -1,3 +1,4 @@
+
 'use server';
 
 import {
@@ -13,6 +14,7 @@ import {
 } from '@/ai/flows/answer-document-questions';
 import { translateText, TranslateTextInput } from '@/ai/flows/translate-text';
 import { generateAudioSummary, GenerateAudioSummaryInput } from '@/ai/flows/generate-audio-summary';
+import { addHistory, getHistory as getHistoryFromDb } from '@/services/firestore';
 import mammoth from 'mammoth';
 
 export interface DocumentAnalysisState {
@@ -53,7 +55,7 @@ export async function analyzeDocument(
     let documentText = '';
 
     if (file.type === 'application/pdf') {
-      const pdf = (await import('pdf-parse/lib/pdf-parse.js')).default;
+      const pdf = (await import('pdf-parse')).default;
       const data = await pdf(buffer);
       documentText = data.text;
     } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
@@ -66,6 +68,8 @@ export async function analyzeDocument(
     }
     
     const { summary } = await summarizeUploadedDocument({ documentText });
+
+    await addHistory(file.name, summary, documentText);
 
     return { summary, documentText };
   } catch (e) {
@@ -115,5 +119,15 @@ export async function generateAudio(input: GenerateAudioSummaryInput) {
   } catch (error) {
     console.error(error);
     return { error: 'Failed to generate audio.' };
+  }
+}
+
+export async function getHistory() {
+  try {
+    const history = await getHistoryFromDb();
+    return { history };
+  } catch (error) {
+    console.error(error);
+    return { error: 'Failed to fetch history.' };
   }
 }
