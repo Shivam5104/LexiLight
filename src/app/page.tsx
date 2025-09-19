@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useTransition } from 'react';
+import { useActionState, useTransition, useEffect, useState } from 'react';
 import { analyzeDocument, DocumentAnalysisState } from '@/app/actions';
 import { Header } from '@/components/layout/header';
 import { DocumentUpload } from '@/components/document-upload';
@@ -15,6 +15,33 @@ const initialState: DocumentAnalysisState = {
 export default function Home() {
   const [state, formAction] = useActionState(analyzeDocument, initialState);
   const [isResetting, startTransition] = useTransition();
+  const [history, setHistory] = useState<DocumentAnalysisState[]>([]);
+
+  useEffect(() => {
+    // Load history from local storage on mount
+    try {
+      const storedHistory = localStorage.getItem('analysisHistory');
+      if (storedHistory) {
+        setHistory(JSON.parse(storedHistory));
+      }
+    } catch (error) {
+      console.error("Failed to load history from local storage", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    // Save to local storage when a successful analysis is done
+    if (state.summary && state.documentText) {
+      const newHistory = [...history, state];
+      setHistory(newHistory);
+      try {
+        localStorage.setItem('analysisHistory', JSON.stringify(newHistory));
+      } catch (error) {
+         console.error("Failed to save history to local storage", error);
+      }
+    }
+  }, [state.summary, state.documentText]);
+
 
   const handleReset = () => {
     startTransition(() => {
