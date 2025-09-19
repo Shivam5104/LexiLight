@@ -39,9 +39,8 @@ export default function Home() {
         </section>
 
         <div className="mt-10 max-w-4xl mx-auto">
-          <form action={formAction}>
             {(!state.summary && !state.documentText) ? (
-                <DocumentUpload error={state.error} />
+                <DocumentUpload error={state.error} formAction={formAction} />
             ) : (
               <DocumentAnalysis
                 summary={state.summary!}
@@ -50,7 +49,6 @@ export default function Home() {
                 isResetting={isResetting}
               />
             )}
-          </form>
         </div>
       </main>
       <footer className="py-6 text-center text-sm text-muted-foreground">

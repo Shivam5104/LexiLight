@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { FileUp, Loader2, AlertCircle, X } from 'lucide-react';
 
-export function DocumentUpload({ error }: { error?: string }) {
+export function DocumentUpload({ error, formAction }: { error?: string, formAction: (payload: FormData) => void }) {
   const { pending } = useFormStatus();
   const [file, setFile] = useState<File | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -59,7 +59,7 @@ export function DocumentUpload({ error }: { error?: string }) {
         <CardDescription>Upload a PDF or DOCX file to get started.</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <form action={formAction} className="space-y-4">
           <div
             role="button"
             tabIndex={0}
@@ -127,7 +127,7 @@ export function DocumentUpload({ error }: { error?: string }) {
               'Analyze Document'
             )}
           </Button>
-        </div>
+        </form>
       </CardContent>
     </Card>
   );
