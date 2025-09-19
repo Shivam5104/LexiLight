@@ -45,6 +45,12 @@ export function DocumentUpload({ error }: { error?: string }) {
       inputRef.current.value = '';
     }
   };
+  
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      inputRef.current?.click();
+    }
+  };
 
   return (
     <Card className="shadow-lg">
@@ -55,10 +61,14 @@ export function DocumentUpload({ error }: { error?: string }) {
       <CardContent>
         <div className="space-y-4">
           <div
+            role="button"
+            tabIndex={0}
+            aria-label="File upload area"
             className="relative flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted/50 transition-colors"
             onDragOver={handleDragOver}
             onDrop={handleDrop}
             onClick={() => inputRef.current?.click()}
+            onKeyDown={handleKeyDown}
           >
             <Input
               ref={inputRef}
@@ -72,7 +82,7 @@ export function DocumentUpload({ error }: { error?: string }) {
             />
             {file ? (
               <div className="text-center p-4">
-                <p className="font-medium break-all">{file.name}</p>
+                <p className="font-medium break-all" aria-live="polite">File selected: {file.name}</p>
                 <p className="text-sm text-muted-foreground">({(file.size / 1024).toFixed(2)} KB)</p>
                 <Button
                   type="button"
@@ -84,6 +94,7 @@ export function DocumentUpload({ error }: { error?: string }) {
                     handleRemoveFile();
                   }}
                   disabled={pending}
+                  aria-label={`Remove ${file.name}`}
                 >
                   <X className="mr-2 h-4 w-4" />
                   Remove

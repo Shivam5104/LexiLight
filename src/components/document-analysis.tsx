@@ -10,6 +10,8 @@ import { Loader2, Send, Sparkles, Languages, RotateCcw } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 
 interface DocumentAnalysisProps {
   summary: string;
@@ -126,11 +128,24 @@ export function DocumentAnalysis({ summary: initialSummary, documentText, onRese
     <Card className="overflow-hidden shadow-lg">
       <div className="p-6 pb-0 flex justify-between items-start">
         <div>
-          <h3 className="text-2xl font-semibold text-foreground">Document Analysis</h3>
-          <div className="flex items-center gap-2 mt-2">
-              <Button variant={language === 'English' ? 'secondary': 'ghost'} size="sm" onClick={() => handleLanguageToggle('English')} disabled={isTranslating}>English</Button>
-              <Button variant={language === 'Hindi' ? 'secondary': 'ghost'} size="sm" onClick={() => handleLanguageToggle('Hindi')} disabled={isTranslating}>हिन्दी</Button>
-          </div>
+          <h3 className="text-2xl font-semibold text-foreground" id="analysis-title">Document Analysis</h3>
+          <RadioGroup 
+            defaultValue="English" 
+            aria-labelledby="language-group-label"
+            className="flex items-center gap-2 mt-2"
+            onValueChange={(value: Language) => handleLanguageToggle(value)}
+            disabled={isTranslating}
+          >
+            <span id="language-group-label" className="sr-only">Choose display language</span>
+             <div className="flex items-center space-x-2">
+              <RadioGroupItem value="English" id="lang-en" />
+              <Label htmlFor="lang-en">English</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="Hindi" id="lang-hi" />
+              <Label htmlFor="lang-hi">हिन्दी</Label>
+            </div>
+          </RadioGroup>
         </div>
         <Button variant="outline" onClick={onReset} disabled={isResetting}>
           {isResetting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RotateCcw className="mr-2 h-4 w-4" />}
@@ -156,8 +171,10 @@ export function DocumentAnalysis({ summary: initialSummary, documentText, onRese
                     onMouseUp={handleSelectionChange}
                     onTouchEnd={handleSelectionChange}
                   >
-                    {isTranslating && <div className="flex items-center justify-center h-full"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}
-                    {!isTranslating && displayedSummary}
+                    <div aria-live="polite">
+                      {isTranslating && <div className="flex items-center justify-center h-full"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}
+                      {!isTranslating && displayedSummary}
+                    </div>
                   </ScrollArea>
                 </PopoverTrigger>
                 {selectedText && (
@@ -170,17 +187,19 @@ export function DocumentAnalysis({ summary: initialSummary, documentText, onRese
                         </p>
                       </div>
                        <p className="text-sm border-l-2 border-primary pl-2 italic text-muted-foreground">"{selectedText}"</p>
-                      {isExplaining && (
-                        <div className="flex items-center justify-center p-4">
-                          <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                        </div>
-                      )}
-                      {jargonExplanation && !isExplaining && (
-                         <div className="text-sm space-y-2">
-                            <p className="font-semibold text-accent">Explanation:</p>
-                            <p className="text-foreground">{jargonExplanation}</p>
-                         </div>
-                      )}
+                      <div aria-live="polite">
+                        {isExplaining && (
+                          <div className="flex items-center justify-center p-4">
+                            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                          </div>
+                        )}
+                        {jargonExplanation && !isExplaining && (
+                           <div className="text-sm space-y-2">
+                              <p className="font-semibold text-accent">Explanation:</p>
+                              <p className="text-foreground">{jargonExplanation}</p>
+                           </div>
+                        )}
+                      </div>
                       {!jargonExplanation && !isExplaining && (
                         <Button onClick={handleExplainJargon}>
                           <Sparkles className="mr-2 h-4 w-4" />
@@ -191,13 +210,13 @@ export function DocumentAnalysis({ summary: initialSummary, documentText, onRese
                   </PopoverContent>
                 )}
              </Popover>
-              <p className="text-xs text-muted-foreground mt-2">Select any word or phrase in the summary to get an explanation.</p>
+              <p className="text-xs text-muted-foreground mt-2" id="jargon-explainer-hint">Select any word or phrase in the summary to get an explanation.</p>
           </TabsContent>
           
           <TabsContent value="qa" className="p-6 bg-card m-0">
             <div className="flex flex-col h-[28rem]">
               <ScrollArea className="flex-1 w-full pr-4" ref={qaScrollAreaRef}>
-                 <div className="flex flex-col gap-4">
+                 <div className="flex flex-col gap-4" aria-live="polite">
                     {!answer.English && !isAnswering && (
                       <div className="flex items-center justify-center h-full text-center">
                         <p className="text-muted-foreground">Ask a question about your document to get started.</p>
@@ -222,7 +241,7 @@ export function DocumentAnalysis({ summary: initialSummary, documentText, onRese
                           <p className="font-semibold text-sm">You</p>
                           <p className="text-sm text-muted-foreground">{currentQuestion}</p>
                         </div>
-                        <div className="flex items-center gap-2 p-3 rounded-lg self-start max-w-[80%]">
+                        <div role="status" className="flex items-center gap-2 p-3 rounded-lg self-start max-w-[80%]">
                             <Loader2 className="h-5 w-5 animate-spin text-primary" />
                             <p className="text-sm text-muted-foreground">Thinking...</p>
                         </div>
@@ -247,8 +266,9 @@ export function DocumentAnalysis({ summary: initialSummary, documentText, onRese
                     }
                   }}
                   disabled={isAnswering}
+                  aria-label="Ask a question about your document"
                 />
-                <Button type="submit" size="icon" disabled={isAnswering || !question.trim()}>
+                <Button type="submit" size="icon" disabled={isAnswering || !question.trim()} aria-label="Send question">
                   <Send className="h-4 w-4" />
                 </Button>
               </form>
