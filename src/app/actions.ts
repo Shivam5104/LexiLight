@@ -14,7 +14,6 @@ import {
 } from '@/ai/flows/answer-document-questions';
 import { translateText, TranslateTextInput } from '@/ai/flows/translate-text';
 import { generateAudioSummary, GenerateAudioSummaryInput } from '@/ai/flows/generate-audio-summary';
-import { addHistory, getHistory as getHistoryFromDb } from '@/services/firestore';
 import mammoth from 'mammoth';
 
 export interface DocumentAnalysisState {
@@ -69,8 +68,6 @@ export async function analyzeDocument(
     
     const { summary } = await summarizeUploadedDocument({ documentText });
 
-    await addHistory(file.name, summary, documentText);
-
     return { summary, documentText };
   } catch (e) {
     console.error(e);
@@ -119,15 +116,5 @@ export async function generateAudio(input: GenerateAudioSummaryInput) {
   } catch (error) {
     console.error(error);
     return { error: 'Failed to generate audio.' };
-  }
-}
-
-export async function getHistory() {
-  try {
-    const history = await getHistoryFromDb();
-    return { history };
-  } catch (error) {
-    console.error(error);
-    return { error: 'Failed to fetch history.' };
   }
 }
